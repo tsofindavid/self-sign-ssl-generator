@@ -1,8 +1,8 @@
 # #!/bin/bash -x
 
-DOMAINS=('flosum.app')
-
 set -e
+
+DOMAIN='flosum.app'
 
 for C in `echo root-ca intermediate`; do
 
@@ -60,9 +60,7 @@ openssl genrsa -out intermediate/private/intermediate.key 2048
 openssl req -config intermediate/openssl.conf -sha256 -new -key intermediate/private/intermediate.key -out intermediate/certs/intermediate.csr -subj '/CN=Interm.'
 openssl ca -batch -config root-ca/openssl.conf -keyfile root-ca/private/ca.key -cert root-ca/certs/ca.crt -extensions v3_req -notext -md sha256 -in intermediate/certs/intermediate.csr -out intermediate/certs/intermediate.crt
 
-mkdir out
+mkdir $DOMAIN
 
-for DOMAIN in ${DOMAINS[@]}; do
-  openssl req -new -keyout out/$DOMAIN.key -out out/$DOMAIN.request -days 365 -nodes -subj "/CN=*.$DOMAIN" -newkey rsa:2048
-  openssl ca -batch -config root-ca/openssl.conf -keyfile intermediate/private/intermediate.key -cert intermediate/certs/intermediate.crt -out out/$DOMAIN.crt -infiles out/$DOMAIN.request
-done
+openssl req -new -keyout $DOMAIN/$DOMAIN.key -out $DOMAIN/$DOMAIN.request -days 365 -nodes -subj "/CN=*.$DOMAIN" -newkey rsa:2048
+openssl ca -batch -config root-ca/openssl.conf -keyfile intermediate/private/intermediate.key -cert intermediate/certs/intermediate.crt -out $DOMAIN/$DOMAIN.crt -infiles $DOMAIN/$DOMAIN.request
